@@ -1,0 +1,22 @@
+{
+  "name": "car-dj",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n client,party -c cyan,magenta \"vite\" \"partykit dev\"",
+    "dev:client": "vite",
+    "dev:party": "partykit dev",
+    "build": "vite build",
+    "deploy": "partykit deploy"
+  },
+  "dependencies": {
+    "partysocket": "^1.0.2",
+    "tone": "^15.1.22"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "partykit": "^0.0.112",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.0"
+  }
+}

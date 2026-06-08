@@ -1,0 +1,4 @@
+{
+  "name": "car-dj",
+  "main": "party/server.ts"
+}
