@@ -167,6 +167,7 @@ body {
 }
 
 .slot {
+  position: relative;
   height: 68px;
   border: 2px dashed #ccc;
   border-radius: 8px;
@@ -180,6 +181,21 @@ body {
 }
 .slot:hover    { transform: scale(0.96); opacity: 0.9; }
 .slot.active   { border: 2px solid transparent; }
+.slot.staged   { border-style: solid; }
+
+.slot-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #bbb;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+.slot.staged .slot-dot { background: #EF9F27; }
+.slot.active  .slot-dot { background: #4CAF50; }
 
 .clip-name {
   font-size: 0.62rem;
@@ -191,3 +207,75 @@ body {
   text-transform: lowercase;
 }
 .slot.active .clip-name { color: rgba(255, 255, 255, 0.93); }
+
+/* ── Control bar ── */
+
+.control-bar {
+  display: flex;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #dde;
+  gap: 1rem;
+}
+
+.control-bar-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.control-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.dot-legend {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  font-size: 0.7rem;
+  color: #777;
+  margin-right: 0.25rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-grey  { background: #bbb; }
+.dot-amber { background: #EF9F27; }
+.dot-green { background: #4CAF50; }
+
+.ctrl-btn {
+  padding: 0.42rem 1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid #ccc;
+  background: #fff;
+  color: #1a1a2e;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.ctrl-btn:hover:not(:disabled) { opacity: 0.8; }
+.ctrl-btn:disabled { opacity: 0.4; cursor: default; }
+
+.ctrl-btn-primary {
+  background: #1a1a2e;
+  color: #fff;
+  border-color: #1a1a2e;
+}

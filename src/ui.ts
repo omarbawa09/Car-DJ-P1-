@@ -82,8 +82,10 @@ export function renderSession(
   roomId: string,
   grid: Grid,
   roster: User[],
-  onToggle: (lane: LaneId, slot: number) => void,
-  onToggleAudio: (() => void) | null,  // null = non-host, button hidden
+  onSlotClick: (lane: LaneId, slot: number) => void,
+  onPushLive: () => void,
+  onPullBackStaged: () => void,
+  onToggleAudio: (() => void) | null,
 ): void {
   const app = document.getElementById("app")!;
   app.innerHTML = `
@@ -96,6 +98,18 @@ export function renderSession(
       <div class="grid">
         ${LANE_DEFS.map(l => laneHTML(l, grid[l.id])).join("")}
       </div>
+      <div class="control-bar">
+        <div class="control-bar-left"></div>
+        <div class="control-bar-right">
+          <div class="dot-legend">
+            <span class="legend-item"><span class="dot dot-grey"></span>empty</span>
+            <span class="legend-item"><span class="dot dot-amber"></span>staged</span>
+            <span class="legend-item"><span class="dot dot-green"></span>live</span>
+          </div>
+          <button id="pull-back-btn" class="ctrl-btn">Pull back</button>
+          <button id="push-live-btn" class="ctrl-btn ctrl-btn-primary" disabled>Push live · 0</button>
+        </div>
+      </div>
     </div>
   `;
 
@@ -104,16 +118,19 @@ export function renderSession(
       const el = document.querySelector<HTMLElement>(
         `[data-lane="${lane.id}"][data-slot="${s}"]`,
       );
-      if (el) el.addEventListener("click", () => onToggle(lane.id, s));
+      if (el) el.addEventListener("click", () => onSlotClick(lane.id, s));
     }
   }
+
+  document.getElementById("push-live-btn")!.addEventListener("click", onPushLive);
+  document.getElementById("pull-back-btn")!.addEventListener("click", onPullBackStaged);
 
   if (onToggleAudio) {
     const audioBtn = document.getElementById("audio-btn") as HTMLButtonElement;
     let audioOn = false;
     audioBtn.addEventListener("click", () => {
       audioOn = !audioOn;
-      audioBtn.textContent = audioOn ? "Audio on ●" : "&#9654; Start audio";
+      audioBtn.textContent = audioOn ? "Audio on ●" : "▶ Start audio";
       onToggleAudio();
     });
   }
@@ -137,7 +154,7 @@ function slotHTML(lane: LaneDef, slot: number, active: boolean): string {
     data-lane="${lane.id}"
     data-slot="${slot}"
     style="${style}"
-  ><span class="clip-name">${esc(lane.clips[slot] ?? "")}</span></div>`;
+  ><span class="slot-dot"></span><span class="clip-name">${esc(lane.clips[slot] ?? "")}</span></div>`;
 }
 
 // ── Incremental updates ───────────────────────────────────────────────────────
@@ -148,14 +165,43 @@ export function updateSlot(lane: LaneId, slot: number, active: boolean): void {
   );
   if (!el) return;
   const def = LANE_DEFS.find(l => l.id === lane)!;
+  // Slot going live or returning to empty — clear any staged styling
+  el.classList.remove("staged");
   el.classList.toggle("active", active);
   if (active) {
     el.style.background = def.activeColor;
     el.style.borderColor = "";
+    el.style.borderStyle = "";
   } else {
     el.style.background = "";
     el.style.borderColor = `${def.activeColor}55`;
+    el.style.borderStyle = "dashed";
   }
+}
+
+export function updateStagedSlot(lane: LaneId, slot: number, isStaged: boolean): void {
+  const el = document.querySelector<HTMLElement>(
+    `[data-lane="${lane}"][data-slot="${slot}"]`,
+  );
+  if (!el) return;
+  const def = LANE_DEFS.find(l => l.id === lane)!;
+  el.classList.toggle("staged", isStaged);
+  if (isStaged) {
+    el.style.background = "";
+    el.style.borderColor = "#EF9F27";
+    el.style.borderStyle = "solid";
+  } else {
+    el.style.background = "";
+    el.style.borderColor = `${def.activeColor}55`;
+    el.style.borderStyle = "dashed";
+  }
+}
+
+export function updatePushLiveButton(count: number): void {
+  const btn = document.getElementById("push-live-btn") as HTMLButtonElement | null;
+  if (!btn) return;
+  btn.textContent = `Push live · ${count}`;
+  btn.disabled = count === 0;
 }
 
 export function updateRoster(roster: User[]): void {

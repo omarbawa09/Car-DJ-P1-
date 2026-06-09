@@ -69,16 +69,24 @@ export default class CarDJServer implements Party.Server {
         [sender.id],
       );
 
-    } else if (msg["type"] === "toggle") {
+    } else if (msg["type"] === "push_live") {
+      const rawSlots = msg["slots"];
+      if (!Array.isArray(rawSlots)) return;
+      for (const item of rawSlots) {
+        if (typeof item !== "object" || item === null) continue;
+        const r = item as Record<string, unknown>;
+        const lane = r["lane"] as LaneId;
+        const slot = r["slot"] as number;
+        if (!LANE_IDS.includes(lane) || typeof slot !== "number" || slot < 0 || slot > 7) continue;
+        this.grid[lane][slot] = true;
+        this.room.broadcast(JSON.stringify({ type: "toggle", lane, slot, value: true }));
+      }
+    } else if (msg["type"] === "pull_back") {
       const lane = msg["lane"] as LaneId;
       const slot = msg["slot"] as number;
-
       if (!LANE_IDS.includes(lane) || typeof slot !== "number" || slot < 0 || slot > 7) return;
-
-      this.grid[lane][slot] = !this.grid[lane][slot];
-      const value = this.grid[lane][slot];
-
-      this.room.broadcast(JSON.stringify({ type: "toggle", lane, slot, value }));
+      this.grid[lane][slot] = false;
+      this.room.broadcast(JSON.stringify({ type: "toggle", lane, slot, value: false }));
     }
   }
 

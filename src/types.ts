@@ -50,7 +50,8 @@ export type Grid = Record<LaneId, boolean[]>;
 // Client → Server
 export type ClientMessage =
   | { type: "join"; name: string }
-  | { type: "toggle"; lane: LaneId; slot: number };
+  | { type: "push_live"; slots: Array<{ lane: LaneId; slot: number }> }
+  | { type: "pull_back"; lane: LaneId; slot: number };
 
 // Server → Client
 export type ServerMessage =
